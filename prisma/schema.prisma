@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  password              String
+  username              String    @unique @db.VarChar(30)
+    // --- Champs pour la sécurité token ---
+  hashedRefreshToken    String?   
+  
+  // --- Champs pour la confirmation d'email ---
+  isEmailVerified       Boolean   @default(false)
+  verificationToken     String?
+  resetToken            String?
+  resetTokenExpires     DateTime?
+  
+
+  // --- Champs pour Stripe ---
+  stripeCustomerId      String?   @unique
+  isPremium             Boolean   @default(false)
+  premiumEndsAt         DateTime?
+  
+  profile               Profile?
+  recipes               Recipe[]
+  categories            Category[]
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  name      String?
+  isPublic  Boolean  @default(false)
+  
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Recipe {
+  id                  String   @id @default(cuid())
+  name                String
+  ingredients         String[]
+  steps               String[]
+  servings            Int?
+  prep_time           Int?
+  cook_time           Int?
+  
+  image_url           String?
+  cloudinaryPublicId  String?
+  isPublic            Boolean  @default(false)
+
+  userId              String 
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  categoryId          String?   
+  category            Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  
+  recipes   Recipe[]
+  userId    String 
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, userId]) 
+}
