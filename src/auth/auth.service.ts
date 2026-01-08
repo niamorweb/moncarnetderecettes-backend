@@ -148,6 +148,7 @@ export class AuthService {
         password: hashedPassword,
         username: data.username,
         verificationToken: verificationToken,
+        isEmailVerified: true, // To skip email verification
         profile: {
           create: {
             name: data.name,
@@ -158,41 +159,43 @@ export class AuthService {
         profile: true,
       },
     });
-    try {
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-      const verificationLink = `${frontendUrl}/auth/verify?token=${verificationToken}`;
 
-      console.log(`📧 Tentative d'envoi d'email à : ${newUser.email}...`);
+    return this.login(newUser);
+    // try {
+    //   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    //   const verificationLink = `${frontendUrl}/auth/verify?token=${verificationToken}`;
 
-      const { data, error } = await this.resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: [newUser.email],
-        subject: '🍳 Bienvenue sur MonCarnetDeRecettes ! Confirmez votre email',
-        html: this.getEmailTemplate(
-          newUser.profile?.name || 'Chef',
-          verificationLink,
-          `Merci de rejoindre <strong>MonCarnetDeRecettes</strong>. Pour commencer à créer et organiser vos meilleures recettes, veuillez confirmer votre adresse email.`,
-        ),
-        text: `Bienvenue ! Confirmez votre email ici : ${verificationLink}`,
-      });
+    //   console.log(`📧 Tentative d'envoi d'email à : ${newUser.email}...`);
 
-      if (error) {
-        console.error('❌ Échec Resend :', error);
-      } else {
-        console.log(`✅ Email envoyé avec succès ! ID: ${data?.id}`);
-      }
-    } catch (error) {
-      console.error("💥 Erreur critique lors de l'envoi de mail :", error);
-    }
+    //   const { data, error } = await this.resend.emails.send({
+    //     from: 'onboarding@resend.dev',
+    //     to: [newUser.email],
+    //     subject: '🍳 Bienvenue sur MonCarnetDeRecettes ! Confirmez votre email',
+    //     html: this.getEmailTemplate(
+    //       newUser.profile?.name || 'Chef',
+    //       verificationLink,
+    //       `Merci de rejoindre <strong>MonCarnetDeRecettes</strong>. Pour commencer à créer et organiser vos meilleures recettes, veuillez confirmer votre adresse email.`,
+    //     ),
+    //     text: `Bienvenue ! Confirmez votre email ici : ${verificationLink}`,
+    //   });
 
-    return {
-      sub: newUser.id,
-      email: newUser.email,
-      isEmailVerified: newUser.isEmailVerified,
-      username: newUser.username,
-      isPremium: newUser.isPremium,
-      premiumEndsAt: newUser.premiumEndsAt,
-    };
+    //   if (error) {
+    //     console.error('❌ Échec Resend :', error);
+    //   } else {
+    //     console.log(`✅ Email envoyé avec succès ! ID: ${data?.id}`);
+    //   }
+    // } catch (error) {
+    //   console.error("💥 Erreur critique lors de l'envoi de mail :", error);
+    // }
+
+    // return {
+    //   sub: newUser.id,
+    //   email: newUser.email,
+    //   isEmailVerified: newUser.isEmailVerified,
+    //   username: newUser.username,
+    //   isPremium: newUser.isPremium,
+    //   premiumEndsAt: newUser.premiumEndsAt,
+    // };
   }
 
   async verifyEmail(token: string) {

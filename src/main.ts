@@ -8,6 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
   });
+
   app.use(cookieParser());
 
   app.use(
@@ -26,7 +27,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: '*',
+    origin: ['http://localhost:3000', 'https://moncarnetderecettes.vercel.app'],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: 'Content-Type, Accept, Authorization',

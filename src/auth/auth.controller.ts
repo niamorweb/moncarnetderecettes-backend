@@ -68,8 +68,26 @@ export class AuthController {
     return { message: 'Déconnecté avec succès' };
   }
   @Post('register')
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // Méthode avec envoi mail
+    // return this.authService.register(registerDto);
+
+    const result = await this.authService.register(registerDto);
+
+    res.cookie('refresh_token', result.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return {
+      access_token: result.access_token,
+      user: result.user,
+    };
   }
 
   @Get('verify')
