@@ -33,7 +33,7 @@ async function bootstrap() {
     allowedHeaders: '*',
   });
 
-  const port = 80;
+  const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 }
 bootstrap();
