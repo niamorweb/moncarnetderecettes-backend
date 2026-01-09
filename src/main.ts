@@ -27,10 +27,27 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'https://moncarnetderecettes.vercel.app'],
+    origin: (origin, callback) => {
+      // Liste des domaines autorisés (SANS SLASH À LA FIN)
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'https://moncarnetderecettes.vercel.app',
+        'https://www.moncarnetderecettes.vercel.app',
+      ];
+
+      // Si pas d'origine (ex: appel serveur à serveur ou Postman) ou si l'origine est dans la liste
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log(
+          `❌ CORS BLOQUÉ : L'origine "${origin}" n'est pas autorisée !`,
+        );
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    allowedHeaders: '*',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   const port = process.env.PORT || 3000;
