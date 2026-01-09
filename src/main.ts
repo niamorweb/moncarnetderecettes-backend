@@ -29,8 +29,8 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:3000', 'https://moncarnetderecettes.vercel.app'],
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+    allowedHeaders: '*',
   });
 
   const port = process.env.PORT || 3001;
