@@ -33,9 +33,7 @@ async function bootstrap() {
     allowedHeaders: '*',
   });
 
-  const port = process.env.PORT || 3001;
-  console.log(`🚀 Application is starting on port ${port}`);
-
+  const port = 80;
   await app.listen(port, '0.0.0.0');
 }
 bootstrap();
