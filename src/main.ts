@@ -34,6 +34,7 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3001;
+  console.log(`🚀 Application is starting on port ${port}`);
 
   await app.listen(port, '0.0.0.0');
 }
