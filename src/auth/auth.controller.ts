@@ -73,8 +73,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     // Méthode avec envoi mail
-    // return this.authService.register(registerDto);
-
     const result = await this.authService.register(registerDto);
 
     res.cookie('refresh_token', result.refresh_token, {
