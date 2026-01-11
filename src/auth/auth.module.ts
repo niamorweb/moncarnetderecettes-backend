@@ -13,7 +13,7 @@ import { env } from 'prisma/config';
     PassportModule,
     JwtModule.register({
       secret:
-        'process.env.aojkroajrfoajojvrojarvpojapojrvapoiurvzijravopjvouroaiuvporavpouapiorvropakjxoprxpkera',
+        'aojkroajrfoajojvrojarvpojapojrvapoiurvzijravopjvouroaiuvporavpouapiorvropakjxoprxpkera',
       signOptions: { expiresIn: '1h' },
     }),
   ],

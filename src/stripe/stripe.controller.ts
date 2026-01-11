@@ -37,6 +37,10 @@ export class StripeWebhookController {
       const userId = session.client_reference_id;
       const stripeCustomerId = session.customer as string;
 
+      console.log('session : ', session);
+      console.log('userId : ', userId);
+      console.log('stripeCustomerId : ', stripeCustomerId);
+
       await this.prisma.user.update({
         where: { id: userId },
         data: {

@@ -42,8 +42,10 @@ export class StripeService {
       ],
       mode: 'subscription',
       client_reference_id: userId,
-      success_url: `http://localhost:3000/payment-success`,
-      cancel_url: `http://localhost:3000/payment-cancel`,
+      success_url:
+        process.env.FRONTEND_URL || `http://localhost:3000/payment-success`,
+      cancel_url:
+        process.env.FRONTEND_URL || `http://localhost:3000/payment-cancel`,
       metadata: {
         userId: userId,
       },
