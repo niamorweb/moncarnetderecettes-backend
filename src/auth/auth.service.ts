@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import { Resend } from 'resend';
+import { updatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -189,6 +190,35 @@ export class AuthService {
     }
 
     return this.login(newUser);
+  }
+
+  async updatePassword(userId, data: updatePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Accès refusé');
+    }
+
+    const isMatch = await bcrypt.compare(data.oldPassword, user.password);
+
+    if (isMatch) {
+      const hashedNewPassword = await bcrypt.hash(data.newPassword, 10);
+
+      await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          password: hashedNewPassword,
+        },
+      });
+    } else {
+      throw new ForbiddenException("L'ancien mot de passe ne correspond pas");
+    }
   }
 
   async verifyEmail(token: string) {

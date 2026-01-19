@@ -58,13 +58,18 @@ export class RecipesController {
         {
           ...data,
           image_url: uploadResult.secure_url,
-          cloudinaryPublicId: uploadResult.public_id, // 👈 AJOUTE ÇA
+          cloudinaryPublicId: uploadResult.public_id,
         },
         userId,
       );
     } else {
-      throw new NotFoundException(
-        'Une image est nécessaire pour créer une recette',
+      return this.recipesServices.createRecipe(
+        {
+          ...data,
+          image_url: null,
+          cloudinaryPublicId: null,
+        },
+        userId,
       );
     }
   }

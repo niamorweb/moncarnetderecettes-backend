@@ -31,6 +31,25 @@ export class CloudinaryService {
     });
   }
 
+  async uploadImageAvatar(file: Express.Multer.File) {
+    const compressedImageBuffer = await sharp(file.buffer)
+      .resize(400, 400, { fit: 'inside' })
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: 'mycook_profiles_avatar' },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      uploadStream.end(compressedImageBuffer);
+    });
+  }
+
   async deleteImage(publicId: string) {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.destroy(publicId, (error, result) => {

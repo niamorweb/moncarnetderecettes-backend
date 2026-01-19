@@ -26,6 +26,7 @@ model User {
   isPremium             Boolean   @default(false)
   premiumEndsAt         DateTime?
   
+  Orders                Order[]
   profile               Profile?
   recipes               Recipe[]
   categories            Category[]
@@ -34,16 +35,73 @@ model User {
   updatedAt             DateTime  @updatedAt
 }
 
-model Profile {
-  id        String   @id @default(cuid())
-  name      String?
-  isPublic  Boolean  @default(false)
-  
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+enum OrderStatus {
+  PENDING        
+  PAID            
+  IN_PRODUCTION   
+  SHIPPED        
+  DELIVERED       
+  CANCELLED      
+  REFUNDED        
+}
 
+model Order {
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amountTotal     Int      
+  currency        String   @default("eur")
+  
+  stripeSessionId String?  @unique 
+  stripePaymentIntentId String? @unique 
+  receiptUrl      String?  
+
+  status          OrderStatus @default(PENDING)
+  quantity        Int      @default(1)
+  
+  printOptions    Json   
+  
+  pdfUrl          String?  
+
+  externalOrderId String?  
+  trackingNumber  String?  
+  trackingUrl     String?  
+  carrier         String? 
+  shippingAddress ShippingAddress?
+}
+
+model ShippingAddress {
+  id          String  @id @default(cuid())
+  orderId     String  @unique
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  name        String 
+  line1       String 
+  line2       String? 
+  city        String
+  postalCode  String
+  state       String?
+  country     String  
+  phone       String? 
+}
+
+model Profile {
+  id                            String   @id @default(cuid())
+  name                          String?
+  isPublic                      Boolean  @default(false)
+  bio                           String?
+  avatar_url                    String?
+  avatar_cloudinary_public_id   String?
+
+  userId                        String   @unique
+  user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
 }
 
 model Recipe {

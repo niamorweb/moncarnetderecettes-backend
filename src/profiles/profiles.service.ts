@@ -61,17 +61,24 @@ export class ProfilesService {
   }
 
   async updateProfile(userId: string, data: any) {
-    return this.prisma.user.update({
+    console.log(' czcz ', data);
+
+    await this.prisma.user.update({
       where: { id: userId },
       data: {
         username: data.username,
         profile: {
           update: {
             name: data.public_name,
+            bio: data.bio,
+            avatar_url: data.avatar_url,
+            avatar_cloudinary_public_id: data.avatar_cloudinary_public_id, // Nouveau champ
           },
         },
       },
       include: { profile: true },
     });
+
+    return { success: true, message: 'Profile updated' };
   }
 }

@@ -8,12 +8,18 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import type { Request, Response } from 'express';
+import { updatePasswordDto } from './dto/update-password.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -112,6 +118,14 @@ export class AuthController {
       user: data.user,
       message: data.message,
     };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('update-password')
+  async updatePassword(@Req() req: Request, @Body() data: updatePasswordDto) {
+    if (!req.user) throw new BadRequestException('Accès refusé');
+    const userId = req.user['userId'];
+    return this.authService.updatePassword(userId, data);
   }
 
   @Post('resend-verification')

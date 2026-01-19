@@ -12,4 +12,16 @@ export class UpdateProfileDto {
   @IsBoolean()
   @IsOptional()
   isPublic?: boolean;
+
+  @IsString()
+  @IsOptional()
+  bio?: boolean;
+
+  @IsOptional()
+  @IsString()
+  avatar_url?: string;
+
+  @IsOptional()
+  @IsString()
+  avatar_cloudinary_public_id?: string;
 }
