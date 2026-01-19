@@ -11,6 +11,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -47,7 +48,6 @@ export class ProfilesController {
   async getMe(@Request() req) {
     return this.profilesService.getMyProfile(req.user.userId);
   }
-
   @UseGuards(AuthGuard('jwt'), EmailVerifiedGuard)
   @Patch('me')
   @UseInterceptors(FileInterceptor('avatar'))
@@ -57,7 +57,7 @@ export class ProfilesController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5 Mo
           new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp)' }),
         ],
         fileIsRequired: false,
@@ -65,19 +65,73 @@ export class ProfilesController {
     )
     file: Express.Multer.File,
   ) {
+    console.log(
+      '[UPDATE PROFILE] Début de la mise à jour du profil pour l’utilisateur ID:',
+      req.user.userId,
+    );
+
+    if (!file) {
+      console.log(
+        '[UPDATE PROFILE] Aucun fichier avatar reçu. Mise à jour sans changement d’avatar.',
+      );
+    } else {
+      console.log('[UPDATE PROFILE] Fichier reçu :', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        filename: file.filename,
+      });
+    }
+
     const userId = req.user.userId;
     let updateData = { ...data };
 
     if (file) {
-      const uploadResult: any =
-        await this.cloudinaryServices.uploadImageAvatar(file);
+      console.log('[UPDATE PROFILE] Upload de l’avatar en cours...');
+      try {
+        const uploadResult: any =
+          await this.cloudinaryServices.uploadImageAvatar(file);
+        console.log('[UPDATE PROFILE] Upload Cloudinary réussi :', {
+          secure_url: uploadResult.secure_url,
+          public_id: uploadResult.public_id,
+        });
 
-      updateData = {
-        ...updateData,
-        avatar_url: uploadResult.secure_url,
-        avatar_cloudinary_public_id: uploadResult.public_id,
-      };
+        updateData = {
+          ...updateData,
+          avatar_url: uploadResult.secure_url,
+          avatar_cloudinary_public_id: uploadResult.public_id,
+        };
+      } catch (error) {
+        console.error(
+          '[UPDATE PROFILE] Erreur lors de l’upload Cloudinary :',
+          error,
+        );
+        throw new InternalServerErrorException(
+          'Échec du téléchargement de l’avatar',
+        );
+      }
     }
-    return this.profilesService.updateProfile(userId, updateData);
+
+    console.log(
+      '[UPDATE PROFILE] Mise à jour du profil avec les données :',
+      updateData,
+    );
+
+    try {
+      const result = await this.profilesService.updateProfile(
+        userId,
+        updateData,
+      );
+      console.log('[UPDATE PROFILE] Profil mis à jour avec succès :', result);
+      return result;
+    } catch (error) {
+      console.error(
+        '[UPDATE PROFILE] Erreur lors de la mise à jour du profil :',
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Échec de la mise à jour du profil',
+      );
+    }
   }
 }

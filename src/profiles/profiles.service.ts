@@ -20,6 +20,8 @@ export class ProfilesService {
         profile: {
           select: {
             name: true,
+            bio: true,
+            avatar_url: true,
           },
         },
         recipes: {
