@@ -15,6 +15,7 @@ import {
   FileTypeValidator,
   Patch,
   NotFoundException,
+  Res,
 } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { RecipeDto } from './dto/recipe.dto';
@@ -144,5 +145,19 @@ export class RecipesController {
   @Delete(':id')
   async delete(@Param('id') id: string, @Request() req) {
     return this.recipesServices.deleteRecipe(id, req.user.userId);
+  }
+
+  @Get('pdf/print-all')
+  async printAllRecipes(@Request() req, @Res() res) {
+    const pdfBuffer = await this.recipesServices.printAllRecipes(
+      req.user.userId,
+    );
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="mes-recettes.pdf"',
+      'Content-Length': pdfBuffer.length,
+    });
+
+    res.end(pdfBuffer);
   }
 }

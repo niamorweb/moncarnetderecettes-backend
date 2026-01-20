@@ -1,13 +1,23 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import puppeteer from 'puppeteer';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as Handlebars from 'handlebars';
+import { Browser } from 'puppeteer';
 
 @Injectable()
 export class RecipesService {
+  private browser: Browser;
+  private compiledTemplate: Handlebars.TemplateDelegate;
+  private readonly logger = new Logger(RecipesService.name);
+
   constructor(
     private prisma: PrismaService,
     private cloudinaryService: CloudinaryService,
@@ -175,5 +185,82 @@ export class RecipesService {
     }
 
     return recipe;
+  }
+  async onModuleInit() {
+    try {
+      const templatePath = join(
+        process.cwd(),
+        'src',
+        'templates',
+        'recipes-book.hbs',
+      );
+      const templateHtml = readFileSync(templatePath, 'utf-8');
+
+      if (!templateHtml || templateHtml.trim().length === 0) {
+        throw new Error(`Le fichier template est vide : ${templatePath}`);
+      }
+
+      this.compiledTemplate = Handlebars.compile(templateHtml);
+    } catch (e) {
+      throw e;
+    }
+    await this.launchBrowser();
+  }
+
+  private async launchBrowser() {
+    if (!this.browser || !this.browser.isConnected()) {
+      this.logger.log("🚀 Lancement de l'instance Chrome...");
+      this.browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+        ],
+      });
+    }
+  }
+
+  async onModuleDestroy() {
+    if (this.browser) {
+      await this.browser.close();
+    }
+  }
+
+  async printAllRecipes(userId: string): Promise<Buffer> {
+    this.logger.log(`📥 Début génération pour userId: ${userId}`);
+
+    if (!this.compiledTemplate) {
+      throw new Error('Template non initialisé');
+    }
+
+    const recipes = await this.prisma.recipe.findMany({
+      where: { userId },
+      include: { category: true },
+    });
+
+    this.logger.log(`Found ${recipes.length} recipes`);
+
+    const htmlContent = this.compiledTemplate({ recipes });
+    if (!htmlContent || htmlContent.startsWith('undefined')) {
+      throw new Error('Erreur de rendu Handlebars');
+    }
+
+    await this.launchBrowser();
+    const page = await this.browser.newPage();
+
+    try {
+      await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+      const pdfUint8Array = await page.pdf({
+        format: 'A5',
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      });
+
+      return Buffer.from(pdfUint8Array);
+    } finally {
+      await page.close();
+    }
   }
 }

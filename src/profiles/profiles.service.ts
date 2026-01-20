@@ -12,7 +12,7 @@ export class ProfilesService {
 
   async getPublicProfileByUsername(username: string) {
     const user = await this.prisma.user.findUnique({
-      where: { username: username, isPremium: true },
+      where: { username: username },
       select: {
         id: true,
         username: true,
@@ -74,7 +74,7 @@ export class ProfilesService {
             name: data.public_name,
             bio: data.bio,
             avatar_url: data.avatar_url,
-            avatar_cloudinary_public_id: data.avatar_cloudinary_public_id, // Nouveau champ
+            avatar_cloudinary_public_id: data.avatar_cloudinary_public_id,
           },
         },
       },
