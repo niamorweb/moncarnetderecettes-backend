@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { OrdersService } from 'src/orders/orders.service';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('webhooks')
@@ -16,6 +17,7 @@ export class StripeWebhookController {
   constructor(
     private readonly stripeService: StripeService,
     private readonly prisma: PrismaService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   @Post('stripe')
@@ -31,24 +33,32 @@ export class StripeWebhookController {
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
 
-    // Activation de l'abonnement
+    // Checkout session terminée (abonnement premium OU commande de carnet)
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-      const userId = session.client_reference_id;
-      const stripeCustomerId = session.customer as string;
 
-      console.log('session : ', session);
-      console.log('userId : ', userId);
-      console.log('stripeCustomerId : ', stripeCustomerId);
+      if (session.metadata?.type === 'book_order') {
+        // Commande de carnet physique
+        const orderId = session.metadata.orderId;
+        const paymentIntentId = session.payment_intent as string;
+        await this.ordersService.handlePaymentSuccess(
+          orderId,
+          paymentIntentId,
+        );
+      } else {
+        // Activation de l'abonnement premium
+        const userId = session.client_reference_id;
+        const stripeCustomerId = session.customer as string;
 
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          isPremium: true,
-          stripeCustomerId: stripeCustomerId,
-          premiumEndsAt: null,
-        },
-      });
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: {
+            isPremium: true,
+            stripeCustomerId: stripeCustomerId,
+            premiumEndsAt: null,
+          },
+        });
+      }
     }
 
     if (event.type === 'customer.subscription.updated') {
@@ -110,10 +120,16 @@ export class StripeWebhookController {
       throw new BadRequestException('Aucun abonnement trouvé');
     }
 
-    await this.stripeService.cancelSubscription(user.stripeCustomerId);
+    const result = await this.stripeService.cancelSubscription(user.stripeCustomerId);
+    const subscription = result as any;
+
+    const endsAt = subscription?.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : null;
 
     return {
       message: 'Votre abonnement ne sera pas renouvelé à la fin du mois.',
+      endsAt,
     };
   }
 }

@@ -42,12 +42,26 @@ async function bootstrap() {
       // Liste des domaines autorisés (SANS SLASH À LA FIN)
       const allowedOrigins = [
         'http://localhost:3000',
+        'http://localhost:8081',
+        'http://localhost:19006',
         'https://moncarnetderecettes.vercel.app',
         'https://www.moncarnetderecettes.vercel.app',
       ];
 
+      // Patterns pour le développement local (Expo, simulateurs, etc.)
+      const devPatterns = [
+        /^http:\/\/localhost:\d+$/,
+        /^http:\/\/192\.168\.\d+\.\d+:\d+$/,
+        /^http:\/\/10\.\d+\.\d+\.\d+:\d+$/,
+        /^exp:\/\//,
+      ];
+
+      const isDev = process.env.NODE_ENV !== 'production';
+      const isDevOrigin =
+        isDev && devPatterns.some((p) => p.test(origin || ''));
+
       // Si pas d'origine (ex: appel serveur à serveur ou Postman) ou si l'origine est dans la liste
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || isDevOrigin) {
         callback(null, true);
       } else {
         console.log(
@@ -58,7 +72,7 @@ async function bootstrap() {
     },
     credentials: true,
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    allowedHeaders: '*',
   });
 
   const port = process.env.PORT || 3001;

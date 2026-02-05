@@ -12,9 +12,13 @@ export class ProfilesService {
 
   async getPublicProfileByUsername(username: string) {
     const user = await this.prisma.user.findUnique({
-      where: { username: username },
+      where: {
+        username: username,
+        profile: {
+          isPublic: true,
+        },
+      },
       select: {
-        id: true,
         username: true,
         isPremium: true,
         profile: {
@@ -22,6 +26,16 @@ export class ProfilesService {
             name: true,
             bio: true,
             avatar_url: true,
+            location: true,
+            website: true,
+            instagram: true,
+            tiktok: true,
+            youtube: true,
+            pinterest: true,
+            threads: true,
+            facebook: true,
+            twitter: true,
+            twitch: true,
           },
         },
         recipes: {
@@ -32,7 +46,7 @@ export class ProfilesService {
             prep_time: true,
             cook_time: true,
             servings: true,
-            category: { select: { id: true, name: true } },
+            category: { select: { name: true, id: true } },
           },
         },
         categories: {
@@ -44,9 +58,12 @@ export class ProfilesService {
       },
     });
 
+    if (!user) {
+      return null;
+    }
+
     return user;
   }
-
   async getMyProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -63,24 +80,29 @@ export class ProfilesService {
   }
 
   async updateProfile(userId: string, data: any) {
-    console.log(' czcz ', data);
+    console.log(`PATCH profile for user ${userId}`);
+
+    const { username, public_name, is_public, ...rest } = data;
+    console.log(`DATA profile for user ${data.is_public}`);
+
+    const profileData: any = { ...rest };
+
+    if (public_name !== undefined) profileData.name = public_name;
+
+    if (is_public !== undefined) {
+      profileData.isPublic = is_public === 'true' || is_public === true;
+    }
 
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        username: data.username,
+        ...(username && { username }),
         profile: {
-          update: {
-            name: data.public_name,
-            bio: data.bio,
-            avatar_url: data.avatar_url,
-            avatar_cloudinary_public_id: data.avatar_cloudinary_public_id,
-          },
+          update: profileData,
         },
       },
-      include: { profile: true },
     });
 
-    return { success: true, message: 'Profile updated' };
+    return { success: true, message: 'Profil mis à jour' };
   }
 }

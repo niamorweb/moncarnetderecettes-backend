@@ -9,5 +9,6 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
   imports: [PrismaModule, CloudinaryModule, AuthModule],
   controllers: [RecipesController],
   providers: [RecipesService],
+  exports: [RecipesService],
 })
 export class RecipesModule {}

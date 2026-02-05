@@ -78,20 +78,14 @@ export class GeminiService {
       const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!textResponse) {
-        this.logger.warn('Réponse vide de la part de Gemini');
         throw new Error('Aucune réponse générée');
       }
-
-      console.log(
-        `Début du contenu brut : ${textResponse.substring(0, 100)}...`,
-      );
 
       const parsedData =
         typeof textResponse === 'string'
           ? JSON.parse(textResponse)
           : textResponse;
 
-      console.log('Parsing JSON réussi');
       return { success: true, data: textResponse };
     } catch (error) {
       this.logger.error(

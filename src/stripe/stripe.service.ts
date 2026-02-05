@@ -54,6 +54,45 @@ export class StripeService {
     return session;
   }
 
+  async createBookCheckoutSession(
+    userId: string,
+    orderId: string,
+    amountCents: number,
+    productLabel: string,
+  ) {
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Carnet de Recettes MyCook',
+              description: productLabel,
+            },
+            unit_amount: amountCents,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      client_reference_id: userId,
+      success_url:
+        (process.env.FRONTEND_URL || 'http://localhost:3000') +
+        '/order-success',
+      cancel_url:
+        (process.env.FRONTEND_URL || 'http://localhost:3000') +
+        '/order-cancel',
+      metadata: {
+        userId,
+        orderId,
+        type: 'book_order',
+      },
+    });
+
+    return session;
+  }
+
   async cancelSubscription(stripeCustomerId: string) {
     // Récupération abonnements actif du client
     const subscriptions = await this.stripe.subscriptions.list({

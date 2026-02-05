@@ -88,7 +88,6 @@ model ShippingAddress {
   country     String  
   phone       String? 
 }
-
 model Profile {
   id                            String   @id @default(cuid())
   name                          String?
@@ -96,6 +95,17 @@ model Profile {
   bio                           String?
   avatar_url                    String?
   avatar_cloudinary_public_id   String?
+
+  location                      String?
+  website                       String?
+  instagram                     String?
+  tiktok                        String?
+  youtube                       String?
+  pinterest                     String?
+  threads                       String?
+  facebook                      String?
+  twitter                       String?
+  twitch                        String?
 
   userId                        String   @unique
   user                          User     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -50,6 +50,27 @@ export class CloudinaryService {
     });
   }
 
+  async uploadPdfRaw(buffer: Buffer, fileName: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'mycook_pdfs',
+          resource_type: 'raw',
+          public_id: fileName,
+          format: 'pdf',
+          access_mode: 'public',
+          type: 'upload',
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result!.secure_url);
+        },
+      );
+
+      uploadStream.end(buffer);
+    });
+  }
+
   async deleteImage(publicId: string) {
     return new Promise((resolve, reject) => {
       cloudinary.uploader.destroy(publicId, (error, result) => {

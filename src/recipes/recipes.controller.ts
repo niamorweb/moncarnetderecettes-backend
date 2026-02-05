@@ -16,6 +16,7 @@ import {
   Patch,
   NotFoundException,
   Res,
+  Query,
 } from '@nestjs/common';
 import { RecipesService } from './recipes.service';
 import { RecipeDto } from './dto/recipe.dto';
@@ -76,9 +77,23 @@ export class RecipesController {
   }
 
   @Get('all')
-  async findAll(@Request() req) {
+  async findAll(
+    @Request() req,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('categoryId') categoryId?: string,
+  ) {
     const userId = req.user.userId;
-    return this.recipesServices.findAll(userId);
+
+    // If no pagination params, return all (backward compat for pdf-viewer etc.)
+    if (!page && !limit) {
+      return this.recipesServices.findAll(userId);
+    }
+
+    const pageNum = Math.max(1, parseInt(page || '1', 10));
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit || '20', 10)));
+
+    return this.recipesServices.findPaginated(userId, pageNum, limitNum, categoryId || undefined);
   }
 
   @Patch('bulk-move')

@@ -1,0 +1,286 @@
+<html>
+  <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500;700&display=swap');
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        -webkit-print-color-adjust: exact;
+      }
+
+      /* Variable Colors for easy tweaking */
+      :root {
+        --bg-paper: #F5F2EA;
+        --accent-green: #263A29; /* Deep Forest Green */
+        --accent-gold: #C6A87C;
+        --text-dark: #1A1A1A;
+        --text-light: #FAFAF8;
+      }
+
+      .cover-spread {
+        width:{{spreadWidth}}mm;
+                    height:{{spreadHeight}}mm;
+                    position: relative;
+                    overflow: hidden;
+                    box-sizing: border-box;
+                    background-color: var(--bg-paper);
+                    font-family: 'Cormorant Garamond', serif;
+                  }
+
+                  /* ── Background Elements (Texture & Fill) ── */
+                  .wrap-fill {
+                    position: absolute;
+                    inset: 0;
+                    background-color: var(--bg-paper);
+                    z-index: 0;
+                  }
+
+                  /* Decorative grain/noise could be added here if supported by PDF renderer */
+
+                  /* ── Front cover ── */
+                  .front-cover {
+                    position: absolute;
+                    top:{{frontTop}}mm;
+                    left:{{frontLeft}}mm;
+                    width:{{frontWidth}}mm;
+                    height:{{frontHeight}}mm;
+                    z-index: 2;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    background-color: var(--bg-paper);
+                  }
+
+                  /* Modern Layout: Image takes top 65%, text overlaps slightly */
+                  .front-image-container {
+                    width: 100%;
+                    height: 70%;
+                    position: relative;
+                  }
+
+                  .front-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    filter: contrast(1.05) saturate(0.9); /* Slight editorial look */
+                  }
+
+                  /* A subtle overlay gradient at the bottom of the image */
+                  .front-image-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 30%;
+                    background: linear-gradient(to top, var(--bg-paper) 0%, transparent 100%);
+                  }
+
+                  .front-text {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                    padding: 0 10mm;
+                    text-align: center;
+                    transform: translateY(-15mm); /* Pull text up over the image fade */
+                    z-index: 10;
+                  }
+
+                  .subtitle {
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 8pt;
+                    font-weight: 500;
+                    letter-spacing: 2mm;
+                    text-transform: uppercase;
+                    color: var(--accent-green);
+                    margin-bottom: 2mm;
+                  }
+
+                  .cover-title {
+                    font-family: 'Cormorant Garamond', serif;
+                    font-size: 52pt; /* Much bigger */
+                    font-weight: 400; /* Lighter weight looks more elegant */
+                    font-style: italic;
+                    line-height: 0.9;
+                    margin: 0;
+                    color: var(--text-dark);
+                  }
+
+                  .cover-title span {
+                    display: block;
+                    font-size: 0.6em;
+                    font-style: normal;
+                    font-weight: 600;
+                    margin-top: 2mm;
+                    letter-spacing: 0.5mm;
+                    color: var(--accent-green);
+                  }
+
+                  /* Badge style for author */
+                  .author-badge {
+                    margin-top: 8mm;
+                    border: 1px solid var(--accent-green);
+                    padding: 2mm 6mm;
+                    border-radius: 50px;
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 7pt;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 1mm;
+                    color: var(--accent-green);
+                  }
+
+                  /* ── Back cover ── */
+                  .back-cover {
+                    position: absolute;
+                    top:{{backTop}}mm;
+                    left:{{backLeft}}mm;
+                    width:{{backWidth}}mm;
+                    height:{{backHeight}}mm;
+                    z-index: 2;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    background-color: var(--accent-green); /* Contrast back */
+                    overflow: hidden;
+                    padding: 15mm;
+                    box-sizing: border-box;
+                  }
+
+                  /* A decorative border inside the back cover */
+                  .back-frame {
+                    width: 100%;
+                    height: 100%;
+                    border: 1px solid rgba(255,255,255, 0.2);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 10mm;
+                    box-sizing: border-box;
+                  }
+
+                  .back-image-circle {
+                    width: 40mm;
+                    height: 40mm;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 2px solid var(--bg-paper);
+                    margin-bottom: 5mm;
+                  }
+
+                  .back-quote {
+                    font-family: 'Cormorant Garamond', serif;
+                    font-size: 18pt;
+                    font-weight: 400;
+                    font-style: italic;
+                    color: var(--bg-paper);
+                    line-height: 1.4;
+                    text-align: center;
+                    margin: 0;
+                  }
+
+                  .back-footer {
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 6pt;
+                    color: rgba(255,255,255,0.6);
+                    text-transform: uppercase;
+                    letter-spacing: 1.5mm;
+                    margin-top: auto;
+                  }
+
+                  /* ── Spine ── */
+                  .spine {
+                    position: absolute;
+                    top:{{spineTop}}mm;
+                    left:{{spineLeft}}mm;
+                    width:{{spineWidth}}mm;
+                    height:{{spineHeight}}mm;
+                    z-index: 3;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    /* Matches the back cover for a seamless wrap effect */
+                    background-color: var(--accent-green);
+                  }
+
+                  .spine-text {
+                    font-family: 'Montserrat', sans-serif;
+                    font-size: 7pt; /* Adjusted for readability */
+                    font-weight: 600;
+                    color: var(--bg-paper);
+                    writing-mode: vertical-rl;
+                    text-orientation: mixed;
+                    letter-spacing: 2mm; /* Elegant spacing */
+                    text-transform: uppercase;
+                    white-space: nowrap;
+                  }
+
+                  /* Petite ligne décorative sur la tranche */
+                  .spine-line {
+                    width: 1px;
+                    height: 10mm;
+                    background-color: var(--accent-gold);
+                    margin: 4mm 0;
+                  }
+    </style>
+  </head>
+  <body>
+    <div class='cover-spread'>
+      <div class='wrap-fill'></div>
+
+      <div class='back-cover'>
+        <div class='back-frame'>
+          <div
+            style='flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;'
+          >
+            <img
+              class='back-image-circle'
+              src='https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=600&q=85'
+              alt=''
+            />
+            <p class='back-quote'>
+              "La cuisine est le cœur de la maison, et ces recettes en sont
+              l'âme."
+            </p>
+          </div>
+          <div class='back-footer'>Fait maison avec amour</div>
+        </div>
+      </div>
+
+      <div class='spine'>
+        <div class='spine-line'></div>
+        <span class='spine-text'>{{userName}}</span>
+        <span
+          class='spine-text'
+          style='font-weight:300; letter-spacing:1mm;'
+        >CARNET DE RECETTES</span>
+        <div class='spine-line'></div>
+      </div>
+
+      <div class='front-cover'>
+        <div class='front-image-container'>
+          <img
+            class='front-image'
+            src='https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1600&q=90'
+            alt=''
+          />
+          <div class='front-image-overlay'></div>
+        </div>
+
+        <div class='front-text'>
+          <div class='subtitle'>COLLECTION PRIVÉE</div>
+          <h1 class='cover-title'>
+            Mes Recettes
+            <span>DE FAMILLE</span>
+          </h1>
+          <div class='author-badge'>Par {{userName}}</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

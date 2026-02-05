@@ -27,6 +27,7 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = await this.authService.validateUser(
@@ -41,6 +42,9 @@ export class AuthController {
       user: userData,
     } = await this.authService.login(user);
 
+    // Check if request is from mobile client
+    const isMobile = req.headers['x-client-type'] === 'mobile';
+
     res.cookie('refresh_token', refresh_token, {
       httpOnly: true,
       secure: true,
@@ -48,18 +52,22 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Return refresh_token in body for mobile clients
     return {
       access_token,
       user: userData,
+      ...(isMobile && { refresh_token }),
     };
   }
 
   @Post('refresh')
   async refresh(
+    @Body('refresh_token') bodyRefreshToken: string,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies['refresh_token'];
+    // Accept refresh token from body (mobile) or cookies (web)
+    const refreshToken = bodyRefreshToken || req.cookies['refresh_token'];
     if (!refreshToken) throw new UnauthorizedException();
 
     return this.authService.refreshTokens(refreshToken);
@@ -76,10 +84,14 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() registerDto: RegisterDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     // Méthode avec envoi mail
     const result = await this.authService.register(registerDto);
+
+    // Check if request is from mobile client
+    const isMobile = req.headers['x-client-type'] === 'mobile';
 
     res.cookie('refresh_token', result.refresh_token, {
       httpOnly: true,
@@ -88,9 +100,11 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Return refresh_token in body for mobile clients
     return {
       access_token: result.access_token,
       user: result.user,
+      ...(isMobile && { refresh_token: result.refresh_token }),
     };
   }
 

@@ -48,6 +48,7 @@ export class ProfilesController {
   async getMe(@Request() req) {
     return this.profilesService.getMyProfile(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'), EmailVerifiedGuard)
   @Patch('me')
   @UseInterceptors(FileInterceptor('avatar'))

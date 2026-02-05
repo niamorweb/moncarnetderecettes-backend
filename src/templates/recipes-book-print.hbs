@@ -1,0 +1,354 @@
+{{!-- ========================================================================
+     ANCIEN CODE (commenté)
+     ========================================================================
+<html>
+  <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Georgia:wght@900&display=swap');
+
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; -webkit-print-color-adjust: exact; }
+
+      .recipe-page {
+        width: 154.35mm; height: 216.35mm; padding: 8mm;
+        background-color: #fffbf0; color: #1a1a1a; font-family: serif;
+        display: flex; flex-direction: column; box-sizing: border-box;
+        position: relative; overflow: hidden;
+        page-break-after: always; break-after: page;
+      }
+      .recipe-page:last-child { page-break-after: auto; break-after: auto; }
+      .recipe-page::before {
+        content: ''; position: absolute; inset: 0;
+        background-image: url('https://www.transparenttextures.com/patterns/natural-paper.png');
+        opacity: 0.4; pointer-events: none; z-index: 0;
+      }
+      .deco-circle {
+        position: absolute; bottom: -6mm; right: -6mm; width: 30mm; height: 30mm;
+        background-color: #ffd600; border-radius: 50%; opacity: 0.5; z-index: 0;
+      }
+      header { display: flex; gap: 4mm; margin-bottom: 4mm; align-items: flex-start; position: relative; z-index: 1; }
+      .img-container {
+        width: 38mm; height: 42mm; background-color: #ffffff;
+        border: 0.5mm solid #1a1a1a; box-shadow: 1.5mm 1.5mm 0px #1a1a1a;
+        padding: 2mm 2mm 8mm 2mm; transform: rotate(-2deg); flex-shrink: 0; box-sizing: border-box;
+      }
+      .img-container img { width: 100%; height: 100%; object-fit: cover; border: 0.25mm solid #1a1a1a; }
+      .header-content { flex: 1; padding-top: 2mm; }
+      .category-badge {
+        background-color: #ffd600; padding: 1mm 3mm; font-size: 8pt; font-weight: bold;
+        border: 0.4mm solid #1a1a1a; border-radius: 5mm; text-transform: uppercase;
+        font-family: 'Outfit', sans-serif; display: inline-block;
+      }
+      h1 { font-size: 18pt; line-height: 1; margin: 3mm 0; font-family: 'Georgia', serif; font-weight: 900; }
+      ... (reste de l'ancien CSS)
+    </style>
+  </head>
+  <body>
+    {{#each recipes}}
+      <div class='recipe-page'>... ancien template ...</div>
+    {{/each}}
+    {{#each blankPages}}
+      <div class='recipe-page'></div>
+    {{/each}}
+  </body>
+</html>
+--}}
+
+
+{{!-- ========================================================================
+     NOUVEAU CODE - Single page layout pour Lulu A5 + bleed
+     Print-ready : 148x210mm + bleed 3.175mm = 154.35x216.35mm
+     ======================================================================== --}}
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* --- PAGE CONTAINER (A5 + bleed) --- */
+      .recipe-page {
+        width: 154.35mm;
+        height: 216.35mm;
+        padding: 11mm;
+        background-color: #ffffff;
+        color: #1a1a1a;
+        font-family: 'Playfair Display', serif;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .recipe-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+
+      /* --- HEADER --- */
+      .recipe-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-bottom: 4mm;
+      }
+
+      .recipe-title {
+        font-family: 'Dancing Script', cursive;
+        font-size: 28pt;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        line-height: 1;
+        color: #000;
+        margin: 2mm 0 0 0;
+        text-align: right;
+      }
+
+      .recipe-meta {
+        display: flex;
+        gap: 6mm;
+        align-items: center;
+        margin-top: 2mm;
+        margin-bottom: 1mm;
+        font-family: 'Playfair Display', serif;
+        font-size: 9pt;
+        color: #1f2937;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 1.5mm;
+      }
+
+      .meta-icon {
+        width: 3.5mm;
+        height: 3.5mm;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      /* --- IMAGE SECTION --- */
+      .image-section {
+        position: relative;
+        width: 100%;
+        margin-bottom: 5mm;
+      }
+
+      .image-container {
+        width: 100%;
+        height: 52mm;
+        overflow: hidden;
+        border-radius: 6mm;
+      }
+
+      .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
+
+      .no-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background-color: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-style: italic;
+        color: #9ca3af;
+        font-size: 9pt;
+      }
+
+      /* --- INGREDIENTS CARD (overlay) --- */
+      .ingredients-card {
+        position: absolute;
+        right: 0;
+        top: 35mm;
+        width: 40mm;
+        background-color: #f2eeeb;
+        border-radius: 4mm;
+        padding: 4mm;
+        z-index: 10;
+      }
+
+      .ingredients-title {
+        font-family: 'Dancing Script', cursive;
+        font-weight: 700;
+        font-size: 14pt;
+        margin: 0 0 2.5mm 0;
+        letter-spacing: 0.05em;
+      }
+
+      .ingredients-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-family: 'Playfair Display', serif;
+        font-size: 8pt;
+        color: #1f2937;
+        line-height: 1.4;
+      }
+
+      .ingredients-list li {
+        margin-bottom: 1mm;
+      }
+
+      /* --- DIRECTIONS --- */
+      .directions-section {
+        padding-top: 2mm;
+      }
+
+      .directions-title {
+        font-family: 'Dancing Script', cursive;
+        font-weight: 700;
+        font-size: 18pt;
+        margin: 0 0 3mm 0;
+        letter-spacing: 0.05em;
+      }
+
+      .steps-list {
+        counter-reset: step-counter;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .steps-list li {
+        position: relative;
+        padding-left: 5mm;
+        margin-bottom: 1.5mm;
+        font-size: 8pt;
+        line-height: 1.5;
+        color: #1f2937;
+        counter-increment: step-counter;
+      }
+
+      .steps-list li::before {
+        content: counter(step-counter) '.';
+        position: absolute;
+        left: 0;
+        top: 0;
+        font-weight: 700;
+      }
+
+      /* --- FOOTER --- */
+      .recipe-footer {
+        position: absolute;
+        bottom: 6mm;
+        left: 11mm;
+        right: 11mm;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2mm;
+        border-top: 0.25mm solid #d1d5db;
+        font-family: monospace;
+      }
+
+      .footer-label {
+        font-size: 6pt;
+        color: #9ca3af;
+      }
+
+      .footer-page {
+        font-size: 7pt;
+        font-weight: bold;
+        color: #4b5563;
+      }
+
+      /* --- BLANK PAGE --- */
+      .blank-page {
+        width: 154.35mm;
+        height: 216.35mm;
+        background-color: #ffffff;
+        box-sizing: border-box;
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .blank-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+    </style>
+  </head>
+  <body>
+    {{#each recipes}}
+      <div class='recipe-page'>
+
+        {{!-- HEADER --}}
+        <div class='recipe-header'>
+          <h1 class='recipe-title'>{{this.name}}</h1>
+          <div class='recipe-meta'>
+            <div class='meta-item'>
+              <svg class='meta-icon' viewBox='0 0 24 24'>
+                <path d='M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z' />
+              </svg>
+              <span>{{this.servings}} pers.</span>
+            </div>
+            <div class='meta-item'>
+              <svg class='meta-icon' viewBox='0 0 24 24'>
+                <path d='M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' />
+              </svg>
+              <span>{{this.prep_time}} min</span>
+            </div>
+          </div>
+        </div>
+
+        {{!-- IMAGE + INGREDIENTS OVERLAY --}}
+        <div class='image-section'>
+          <div class='image-container'>
+            {{#if this.image_url}}
+              <img src='{{this.image_url}}' alt='{{this.name}}' />
+            {{else}}
+              <div class='no-image-placeholder'>Aucune illustration</div>
+            {{/if}}
+          </div>
+
+          <div class='ingredients-card'>
+            <h3 class='ingredients-title'>Ingrédients</h3>
+            <ul class='ingredients-list'>
+              {{#each this.ingredients}}
+                <li>{{this}}</li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+
+        {{!-- DIRECTIONS --}}
+        <div class='directions-section'>
+          <h2 class='directions-title'>Préparation</h2>
+          <ol class='steps-list'>
+            {{#each this.steps}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ol>
+        </div>
+
+        {{!-- FOOTER --}}
+        <div class='recipe-footer'>
+          <span class='footer-label'>Mon Carnet de Recettes</span>
+          <span class='footer-page'>{{calcPageSingle @index}}</span>
+        </div>
+
+      </div>
+    {{/each}}
+
+    {{#each blankPages}}
+      <div class='blank-page'></div>
+    {{/each}}
+  </body>
+</html>

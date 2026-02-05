@@ -57,10 +57,6 @@ export class CreateOrderDto {
   @IsNotEmpty()
   printOptions: Record<string, any>;
 
-  @IsString()
-  @IsOptional()
-  pdfUrl?: string;
-
   @ValidateNested()
   @Type(() => ShippingAddressDto)
   shippingAddress: ShippingAddressDto;
