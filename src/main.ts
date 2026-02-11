@@ -39,7 +39,6 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Liste des domaines autorisés (SANS SLASH À LA FIN)
       const allowedOrigins = [
         'http://localhost:3000',
         'http://localhost:8081',
@@ -48,7 +47,6 @@ async function bootstrap() {
         'https://www.moncarnetderecettes.vercel.app',
       ];
 
-      // Patterns pour le développement local (Expo, simulateurs, etc.)
       const devPatterns = [
         /^http:\/\/localhost:\d+$/,
         /^http:\/\/192\.168\.\d+\.\d+:\d+$/,
@@ -60,19 +58,22 @@ async function bootstrap() {
       const isDevOrigin =
         isDev && devPatterns.some((p) => p.test(origin || ''));
 
-      // Si pas d'origine (ex: appel serveur à serveur ou Postman) ou si l'origine est dans la liste
       if (!origin || allowedOrigins.includes(origin) || isDevOrigin) {
         callback(null, true);
       } else {
-        console.log(
-          `❌ CORS BLOQUÉ : L'origine "${origin}" n'est pas autorisée !`,
-        );
+        console.log(`❌ CORS BLOQUÉ : ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true,
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    allowedHeaders: '*',
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
   });
 
   const port = process.env.PORT || 3001;
