@@ -62,17 +62,18 @@ async function bootstrap() {
         callback(null, true);
       } else {
         console.log(`❌ CORS BLOQUÉ : ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        callback(null, false);
       }
     },
+
     credentials: true,
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     allowedHeaders: [
       'Content-Type',
       'Authorization',
       'Accept',
-      'Origin',
       'X-Requested-With',
+      'apollo-require-preflight',
     ],
   });
 
